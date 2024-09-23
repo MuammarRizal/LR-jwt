@@ -1,7 +1,11 @@
 import { NextFunction, Request, Response } from 'express'
 import { logger } from '../utils/logger'
 import Users from '../models/UserModel'
-import bcrypt, { compare, compareSync } from 'bcrypt'
+import bcrypt, { compareSync } from 'bcrypt'
+import jwt from 'jsonwebtoken'
+import dotenv from 'dotenv'
+import { where } from 'sequelize'
+dotenv.config()
 
 const UserControllerGetAllUsers = async (req: Request, res: Response, next: NextFunction) => {
   const users = await Users.findAll()
@@ -40,21 +44,36 @@ const UserControllerRegister = async (req: Request, res: Response, next: NextFun
 const UserControllerLogin = async (req: Request, res: Response, next: NextFunction) => {
   const dataBody = req.body
   try {
-    const dataUser: any = await Users.findOne({ where: { name: dataBody.name } })
+    const dataUser: any = await Users.findOne({ where: { email: dataBody.email } })
     if (!dataUser) {
       logger.warn('Username is not found')
       res.status(404)
       throw new Error('Username is not found')
     }
-    const password = compareSync(req.body.password, dataUser.password)
-    if (!password) {
+    const passwordCompare = compareSync(req.body.password, dataUser.password)
+    if (!passwordCompare) {
       res.status(404)
       throw new Error('password is wrong')
     }
 
+    const { id, name, email } = dataUser.dataValues
+    const accessToken = jwt.sign({ id, name, email }, process.env.ACCESS_TOKEN_SECRET!, {
+      expiresIn: '20s'
+    })
+    const refreshToken = jwt.sign({ id, name, email }, process.env.REFRESH_TOKEN_SECRET!, {
+      expiresIn: '1d'
+    })
+
+    await Users.update({ refresh_token: refreshToken }, { where: { id } })
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000
+    })
+
     res.status(200).send({
       status: 'success',
-      message: `Welcome ${dataUser.name}`
+      message: `Welcome ${dataUser.name}`,
+      accessToken
     })
   } catch (error: any) {
     throw new Error(error)
