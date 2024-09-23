@@ -1,18 +1,29 @@
-import express from 'express'
+import express, { Router } from 'express'
 import db from './config/Database'
 import { logger } from './utils/logger'
-import Users from './models/UserModel'
+import { errorHandler, notFound } from './middlewares/errorMidlleware'
+import router from './routes/userRoutes'
 const app = express()
 
-try {
-  ;(async () => {
-    await db.authenticate()
-    logger.info('Database Connected ....')
-    await Users.sync()
-  })()
-} catch (error) {
-  logger.error(error)
-}
+// connect database
+db.authenticate()
+  .then(() => {
+    logger.info('Database Connected ...')
+  })
+  .catch((err) => {
+    logger.error(`Database is not connected ${err}`)
+  })
+
+// middlewares
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
+
+// routes
+app.use(router)
+
+// middleware error handler
+app.use(notFound)
+app.use(errorHandler)
 
 app.listen(4000, () => {
   logger.info('Server berjalan di port ', 4000)
