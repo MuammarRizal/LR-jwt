@@ -1,6 +1,7 @@
-import express, { Router } from 'express'
+import express from 'express'
 import db from './config/Database'
 import { logger } from './utils/logger'
+import cors from 'cors'
 import cookieParser from 'cookie-parser'
 import { errorHandler, notFound } from './middlewares/errorMidlleware'
 import router from './routes/userRoutes'
@@ -16,6 +17,7 @@ db.authenticate()
   })
 
 // middlewares
+app.use(cors({ credentials: true, origin: 'http://localhost:5173' }))
 app.use(cookieParser())
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
