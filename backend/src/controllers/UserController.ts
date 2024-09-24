@@ -4,7 +4,6 @@ import Users from '../models/UserModel'
 import bcrypt, { compareSync } from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import dotenv from 'dotenv'
-import { where } from 'sequelize'
 dotenv.config()
 
 const UserControllerGetAllUsers = async (req: Request, res: Response, next: NextFunction) => {

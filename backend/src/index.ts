@@ -1,6 +1,7 @@
 import express, { Router } from 'express'
 import db from './config/Database'
 import { logger } from './utils/logger'
+import cookieParser from 'cookie-parser'
 import { errorHandler, notFound } from './middlewares/errorMidlleware'
 import router from './routes/userRoutes'
 const app = express()
@@ -15,6 +16,7 @@ db.authenticate()
   })
 
 // middlewares
+app.use(cookieParser())
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
