@@ -7,10 +7,17 @@ interface JwtDecodedCustom {
   exp: string;
 }
 
+interface Users {
+  name: string;
+  email: string;
+  password: string;
+}
+
 const Dashboard: React.FC = () => {
   const [name, setName] = useState<string>("");
   const [token, setToken] = useState<string>("");
   const [expires, setExpires] = useState<string>("");
+  const [users, setUsers] = useState<Users[]>([]);
   useEffect(() => {
     refreshToken();
   }, []);
@@ -58,12 +65,36 @@ const Dashboard: React.FC = () => {
         Authorization: `Bearer ${token}`,
       },
     });
-    console.log(response.data.data);
+    setUsers(response.data.data);
   };
+
   return (
     <div className="container">
       <h2>Hello {name}</h2>
       <button onClick={getUsers}>Get Users</button>
+      <table className="table">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Name</th>
+            <th scope="col">Email</th>
+            <th scope="col">Password</th>
+          </tr>
+        </thead>
+        <tbody>
+          {users &&
+            users.map((item, index) => (
+              <tr key={index}>
+                <th scope="row">{index + 1}</th>
+                <td>{item.name}</td>
+                <td>{item.email}</td>
+                <td>{item.password}</td>
+              </tr>
+            ))}
+
+          {users.length < 1 && "Data not found"}
+        </tbody>
+      </table>
     </div>
   );
 };
