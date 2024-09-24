@@ -1,14 +1,26 @@
+import axios, { isAxiosError } from "axios";
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const [msg, setMsg] = useState<string>("");
 
-  const handleLogin = (e: React.FormEvent) => {
+  const Auth = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Email:", email, "Password:", password);
-    // Proses login
+    try {
+      await axios.post("http://localhost:4000/login", {
+        email,
+        password,
+      });
+      document.location.href = "/dashboard";
+    } catch (error: any) {
+      if (error.response) {
+        console.log(error);
+        setMsg(error.response.data.message);
+      }
+    }
   };
 
   return (
@@ -19,8 +31,10 @@ const Login: React.FC = () => {
       >
         <div className="card-body">
           <h3 className="text-center mb-4">Login</h3>
-
-          <form onSubmit={handleLogin}>
+          <span className="text-center text-danger d-block my-3">
+            {msg && msg}
+          </span>{" "}
+          <form onSubmit={Auth}>
             <div className="form-group mb-3">
               <label htmlFor="email" className="form-label">
                 Email
@@ -57,7 +71,6 @@ const Login: React.FC = () => {
               </button>
             </div>
           </form>
-
           <div className="mt-3 text-center">
             <small>
               Don't have an account? <Link to="/register">Sign Up</Link>
