@@ -1,7 +1,16 @@
+import axios from "axios";
 import React from "react";
 import { Link } from "react-router-dom";
 
 const Navbar: React.FC = () => {
+  const Logout = async () => {
+    try {
+      await axios.delete("http://localhost:4000/logout");
+      document.location.href = "login";
+    } catch (error) {
+      console.log(error);
+    }
+  };
   return (
     <nav className="navbar navbar-expand-lg navbar-light bg-light">
       <div className="container-fluid">
@@ -22,14 +31,7 @@ const Navbar: React.FC = () => {
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav ms-auto">
             <li className="nav-item">
-              <Link className="nav-link" to="/login">
-                Login
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link className="nav-link" to="/register">
-                Register
-              </Link>
+              <button onClick={Logout}>Logout</button>
             </li>
           </ul>
         </div>
